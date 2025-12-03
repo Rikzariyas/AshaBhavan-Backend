@@ -1,0 +1,44 @@
+{
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "extends": ["eslint:recommended", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "plugins": ["node"],
+  "rules": {
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "prefer-const": "error",
+    "no-var": "error",
+    "object-shorthand": "error",
+    "quote-props": ["error", "as-needed"],
+    "prefer-arrow-callback": "error",
+    "arrow-spacing": "error",
+    "no-duplicate-imports": "error",
+    "no-useless-constructor": "error",
+    "no-useless-rename": "error",
+    "prefer-destructuring": [
+      "error",
+      {
+        "array": false,
+        "object": true
+      }
+    ],
+    "prefer-template": "error",
+    "prefer-rest-params": "error",
+    "prefer-spread": "error",
+    "node/no-unsupported-features/es-syntax": "off",
+    "node/no-missing-import": "off"
+  }
+}
+
