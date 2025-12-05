@@ -276,28 +276,40 @@ Authorization: Bearer <token>
 AshaBhavan-Backend/
 ├── src/
 │   ├── config/
-│   │   └── db.js              # MongoDB connection
+│   │   └── db.js                    # MongoDB connection
 │   ├── controllers/
-│   │   ├── authController.js  # Authentication logic
-│   │   └── galleryController.js # Gallery CRUD operations
+│   │   ├── authController.js        # Authentication logic (login/logout)
+│   │   └── galleryController.js     # Gallery CRUD operations
 │   ├── middleware/
-│   │   ├── authMiddleware.js  # JWT authentication & authorization
-│   │   └── errorMiddleware.js # Error handling
+│   │   ├── authMiddleware.js        # JWT authentication & authorization
+│   │   ├── errorMiddleware.js       # Error handling
+│   │   ├── rateLimiter.js           # Rate limiting middleware
+│   │   └── validation.js            # Joi validation schemas
 │   ├── models/
-│   │   ├── User.js            # User/Admin model
-│   │   └── Gallery.js         # Gallery item model
+│   │   ├── User.js                  # Admin model (only admins exist)
+│   │   ├── Gallery.js               # Gallery item model
+│   │   └── BlacklistedToken.js      # Blacklisted JWT tokens model
 │   ├── routes/
-│   │   ├── authRoutes.js      # Auth endpoints
-│   │   └── galleryRoutes.js   # Gallery endpoints
+│   │   ├── authRoutes.js            # Auth endpoints
+│   │   └── galleryRoutes.js         # Gallery endpoints
 │   └── utils/
-│       ├── jwt.js             # JWT utilities
-│       ├── multerConfig.js    # File upload configuration
-│       └── seedAdmin.js       # Admin user seeder
+│       ├── jwt.js                   # JWT token generation & verification
+│       ├── tokenBlacklist.js        # Token blacklisting utilities
+│       ├── multerConfig.js          # File upload configuration
+│       └── seedAdmin.js             # Admin user seeder
 ├── uploads/
-│   └── gallery/               # Uploaded images storage
-├── server.js                   # Main server file
-├── package.json
-└── README.md
+│   └── gallery/                      # Uploaded images storage
+├── .env                             # Environment variables (not in git)
+├── .eslintrc.json                   # ESLint configuration
+├── .eslintignore                    # ESLint ignore patterns
+├── .prettierrc.json                 # Prettier configuration
+├── .prettierignore                  # Prettier ignore patterns
+├── .gitignore                       # Git ignore patterns
+├── env.txt                          # Sample environment variables
+├── server.js                        # Main server file
+├── package.json                     # Dependencies and scripts
+├── README.md                        # Project documentation
+└── PRODUCTION_QUALITY.md            # Production quality guide
 ```
 
 ## Security Features

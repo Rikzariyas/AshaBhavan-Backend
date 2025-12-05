@@ -18,7 +18,6 @@ import { uploadLimiter } from "../middleware/rateLimiter.js";
 const router = express.Router();
 
 router.get("/", validateGalleryQuery, getGallery);
-router.put("/", protect, adminOnly, validateGalleryUpdate, updateGallery);
 router.post(
   "/upload",
   protect,
@@ -28,6 +27,7 @@ router.post(
   validateGalleryUpload,
   uploadGalleryImage
 );
+router.patch("/:id", protect, adminOnly, validateGalleryUpdate, updateGallery);
 router.delete("/:id", protect, adminOnly, validateGalleryId, deleteGalleryItem);
 
 export default router;

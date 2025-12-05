@@ -12,12 +12,8 @@ const galleryItemSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ["studentWork", "programs", "photos", "videos"],
+      enum: ["studentWork", "programs", "photos"],
       required: [true, "Category is required"],
-    },
-    thumbnail: {
-      type: String,
-      default: null,
     },
   },
   {

@@ -37,7 +37,6 @@ export const getGallery = async (req, res, next) => {
       studentWork: [],
       programs: [],
       photos: [],
-      videos: [],
     };
 
     galleryItems.forEach((item) => {
@@ -48,10 +47,6 @@ export const getGallery = async (req, res, next) => {
         category: item.category,
         createdAt: item.createdAt,
       };
-
-      if (item.category === "videos" && item.thumbnail) {
-        formattedItem.thumbnail = item.thumbnail;
-      }
 
       grouped[item.category].push(formattedItem);
     });
@@ -79,7 +74,7 @@ export const getGallery = async (req, res, next) => {
 // @access  Private/Admin only
 export const updateGallery = async (req, res, next) => {
   try {
-    const { studentWork, programs, photos, videos } = req.body;
+    const { studentWork, programs, photos } = req.body;
 
     const allItems = [
       ...(studentWork || []).map((item) => ({
@@ -88,7 +83,6 @@ export const updateGallery = async (req, res, next) => {
       })),
       ...(programs || []).map((item) => ({ ...item, category: "programs" })),
       ...(photos || []).map((item) => ({ ...item, category: "photos" })),
-      ...(videos || []).map((item) => ({ ...item, category: "videos" })),
     ];
 
     // Delete all existing items
@@ -102,7 +96,6 @@ export const updateGallery = async (req, res, next) => {
       studentWork: [],
       programs: [],
       photos: [],
-      videos: [],
     };
 
     insertedItems.forEach((item) => {
@@ -113,10 +106,6 @@ export const updateGallery = async (req, res, next) => {
         category: item.category,
         createdAt: item.createdAt,
       };
-
-      if (item.category === "videos" && item.thumbnail) {
-        formattedItem.thumbnail = item.thumbnail;
-      }
 
       grouped[item.category].push(formattedItem);
     });
@@ -131,10 +120,9 @@ export const updateGallery = async (req, res, next) => {
   }
 };
 
-// @desc    Upload gallery image (images only - videos cannot be uploaded)
 // @route   POST /api/gallery/upload
 // @access  Private/Admin only
-// @note    Only images can be uploaded. Videos must be added via PUT /api/gallery with URL
+
 export const uploadGalleryImage = async (req, res, next) => {
   try {
     if (!req.file) {
