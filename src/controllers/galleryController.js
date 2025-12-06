@@ -1,11 +1,6 @@
 import Gallery from "../models/Gallery.js";
-import { getFileUrl } from "../utils/multerConfig.js";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { Readable } from "stream";
+import { v2 as cloudinary } from "cloudinary";
 
 // @desc    Get all gallery items
 // @route   GET /api/gallery
@@ -84,12 +79,36 @@ export const uploadGalleryImage = async (req, res, next) => {
     // req.body is already validated and sanitized
     const { category, title } = req.body;
 
-    // Get file URL
-    const fileUrl = getFileUrl(req.file.filename);
+    // Upload to Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "ashabhavan/gallery", // Organize images in a folder
+          resource_type: "image",
+          transformation: [
+            {
+              quality: "auto",
+              fetch_format: "auto",
+            },
+          ],
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
 
-    // Create gallery item
+      // Convert buffer to stream
+      const bufferStream = new Readable();
+      bufferStream.push(req.file.buffer);
+      bufferStream.push(null);
+      bufferStream.pipe(uploadStream);
+    });
+
+    // Create gallery item with Cloudinary URL and public_id
     const galleryItem = await Gallery.create({
-      url: fileUrl,
+      url: uploadResult.secure_url,
+      cloudinaryPublicId: uploadResult.public_id,
       title: title || null,
       category,
     });
@@ -105,15 +124,6 @@ export const uploadGalleryImage = async (req, res, next) => {
       },
     });
   } catch (error) {
-    // Delete uploaded file if error occurs
-    if (req.file && req.file.path) {
-      try {
-        fs.unlinkSync(req.file.path);
-      } catch (unlinkError) {
-        // Log error but don't fail the request
-        console.error("Error deleting file:", unlinkError.message);
-      }
-    }
     next(error);
   }
 };
@@ -136,17 +146,13 @@ export const updateGalleryItem = async (req, res, next) => {
       });
     }
 
-    // If URL is being updated and it's a local file, delete the old file
-    if (updateData.url && galleryItem.url.includes("/uploads/gallery/")) {
-      const filename = galleryItem.url.split("/uploads/gallery/")[1];
-      const filePath = path.join(__dirname, "../../uploads/gallery", filename);
+    // If URL is being updated and it's a Cloudinary image, delete the old image from Cloudinary
+    if (updateData.url && galleryItem.cloudinaryPublicId) {
       try {
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      } catch (fileError) {
+        await cloudinary.uploader.destroy(galleryItem.cloudinaryPublicId);
+      } catch (cloudinaryError) {
         // Log error but don't fail the request
-        console.error("Error deleting old file:", fileError.message);
+        console.error("Error deleting old Cloudinary image:", cloudinaryError.message);
       }
     }
 
@@ -190,20 +196,17 @@ export const deleteGalleryItem = async (req, res, next) => {
       });
     }
 
-    // If it's a local file, delete it from filesystem
-    if (galleryItem.url.includes("/uploads/gallery/")) {
-      const filename = galleryItem.url.split("/uploads/gallery/")[1];
-      const filePath = path.join(__dirname, "../../uploads/gallery", filename);
+    // Delete from Cloudinary if it's a Cloudinary image
+    if (galleryItem.cloudinaryPublicId) {
       try {
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      } catch (fileError) {
+        await cloudinary.uploader.destroy(galleryItem.cloudinaryPublicId);
+      } catch (cloudinaryError) {
         // Log error but don't fail the request
-        console.error("Error deleting file:", fileError.message);
+        console.error("Error deleting Cloudinary image:", cloudinaryError.message);
       }
     }
 
+    // Delete from database
     await Gallery.findByIdAndDelete(id);
 
     res.status(200).json({

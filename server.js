@@ -1,5 +1,6 @@
-import express from "express";
+// Load environment variables FIRST before any other imports
 import dotenv from "dotenv";
+import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -10,8 +11,16 @@ import authRoutes from "./src/routes/authRoutes.js";
 import galleryRoutes from "./src/routes/galleryRoutes.js";
 import { errorHandler, notFound } from "./src/middleware/errorMiddleware.js";
 import { apiLimiter } from "./src/middleware/rateLimiter.js";
+import { v2 as cloudinary } from "cloudinary";
 
 dotenv.config();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,7 +48,7 @@ app.use(express.urlencoded({ limit: "30mb", extended: true }));
 // Logging middleware
 if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
-}else{
+} else {
   app.use(morgan("combined"));
 }
 
@@ -69,6 +78,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(
     `process ID ${
       process.pid

@@ -6,6 +6,10 @@ const galleryItemSchema = new mongoose.Schema(
       type: String,
       required: [true, "URL is required"],
     },
+    cloudinaryPublicId: {
+      type: String,
+      // Not required to support legacy local files
+    },
     title: {
       type: String,
       trim: true,
