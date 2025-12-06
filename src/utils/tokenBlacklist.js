@@ -11,7 +11,7 @@ export const blacklistToken = async (token) => {
     // Decode token without verification to get expiration time
     // This works even if token is expired
     const decoded = jwt.decode(token);
-    
+
     let expiresAt;
     if (decoded && decoded.exp) {
       // Use token's expiration time
@@ -59,4 +59,3 @@ export const isTokenBlacklisted = async (token) => {
   const blacklisted = await BlacklistedToken.findOne({ token });
   return !!blacklisted;
 };
-

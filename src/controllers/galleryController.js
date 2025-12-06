@@ -152,7 +152,10 @@ export const updateGalleryItem = async (req, res, next) => {
         await cloudinary.uploader.destroy(galleryItem.cloudinaryPublicId);
       } catch (cloudinaryError) {
         // Log error but don't fail the request
-        console.error("Error deleting old Cloudinary image:", cloudinaryError.message);
+        console.error(
+          "Error deleting old Cloudinary image:",
+          cloudinaryError.message
+        );
       }
     }
 
@@ -202,7 +205,10 @@ export const deleteGalleryItem = async (req, res, next) => {
         await cloudinary.uploader.destroy(galleryItem.cloudinaryPublicId);
       } catch (cloudinaryError) {
         // Log error but don't fail the request
-        console.error("Error deleting Cloudinary image:", cloudinaryError.message);
+        console.error(
+          "Error deleting Cloudinary image:",
+          cloudinaryError.message
+        );
       }
     }
 

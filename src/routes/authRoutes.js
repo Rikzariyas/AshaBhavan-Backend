@@ -10,4 +10,3 @@ router.post("/login", authLimiter, validateLogin, login);
 router.post("/logout", protect, logout);
 
 export default router;
-
