@@ -1,17 +1,17 @@
 import express from "express";
 import {
   getGallery,
-  updateGallery,
   uploadGalleryImage,
+  updateGalleryItem,
   deleteGalleryItem,
 } from "../controllers/galleryController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 import { upload } from "../utils/multerConfig.js";
 import {
   validateGalleryQuery,
-  validateGalleryUpdate,
   validateGalleryUpload,
   validateGalleryId,
+  validateGalleryItemUpdate,
 } from "../middleware/validation.js";
 import { uploadLimiter } from "../middleware/rateLimiter.js";
 
@@ -27,8 +27,13 @@ router.post(
   validateGalleryUpload,
   uploadGalleryImage
 );
-router.patch("/:id", protect, adminOnly, validateGalleryUpdate, updateGallery);
+router.patch(
+  "/:id",
+  protect,
+  adminOnly,
+  validateGalleryItemUpdate,
+  updateGalleryItem
+);
 router.delete("/:id", protect, adminOnly, validateGalleryId, deleteGalleryItem);
 
 export default router;
-

@@ -69,60 +69,8 @@ export const getGallery = async (req, res, next) => {
   }
 };
 
-// @desc    Update gallery items
-// @route   PUT /api/gallery
-// @access  Private/Admin only
-export const updateGallery = async (req, res, next) => {
-  try {
-    const { studentWork, programs, photos } = req.body;
-
-    const allItems = [
-      ...(studentWork || []).map((item) => ({
-        ...item,
-        category: "studentWork",
-      })),
-      ...(programs || []).map((item) => ({ ...item, category: "programs" })),
-      ...(photos || []).map((item) => ({ ...item, category: "photos" })),
-    ];
-
-    // Delete all existing items
-    await Gallery.deleteMany({});
-
-    // Insert new items
-    const insertedItems = await Gallery.insertMany(allItems);
-
-    // Format response
-    const grouped = {
-      studentWork: [],
-      programs: [],
-      photos: [],
-    };
-
-    insertedItems.forEach((item) => {
-      const formattedItem = {
-        id: item._id.toString(),
-        url: item.url,
-        title: item.title || null,
-        category: item.category,
-        createdAt: item.createdAt,
-      };
-
-      grouped[item.category].push(formattedItem);
-    });
-
-    res.status(200).json({
-      success: true,
-      message: "Gallery updated successfully",
-      data: grouped,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // @route   POST /api/gallery/upload
 // @access  Private/Admin only
-
 export const uploadGalleryImage = async (req, res, next) => {
   try {
     if (!req.file) {
@@ -166,6 +114,62 @@ export const uploadGalleryImage = async (req, res, next) => {
         console.error("Error deleting file:", unlinkError.message);
       }
     }
+    next(error);
+  }
+};
+
+// @desc    Update a single gallery item
+// @route   PATCH /api/gallery/:id
+// @access  Private/Admin only
+export const updateGalleryItem = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Find the gallery item
+    const galleryItem = await Gallery.findById(id);
+
+    if (!galleryItem) {
+      return res.status(404).json({
+        success: false,
+        message: "Gallery item not found",
+      });
+    }
+
+    // If URL is being updated and it's a local file, delete the old file
+    if (updateData.url && galleryItem.url.includes("/uploads/gallery/")) {
+      const filename = galleryItem.url.split("/uploads/gallery/")[1];
+      const filePath = path.join(__dirname, "../../uploads/gallery", filename);
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (fileError) {
+        // Log error but don't fail the request
+        console.error("Error deleting old file:", fileError.message);
+      }
+    }
+
+    // Update the gallery item
+    const updatedItem = await Gallery.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Gallery item updated successfully",
+      data: {
+        id: updatedItem._id.toString(),
+        url: updatedItem.url,
+        title: updatedItem.title || null,
+        category: updatedItem.category,
+        createdAt: updatedItem.createdAt,
+        updatedAt: updatedItem.updatedAt,
+      },
+    });
+  } catch (error) {
     next(error);
   }
 };

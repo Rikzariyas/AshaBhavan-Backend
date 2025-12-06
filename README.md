@@ -18,7 +18,7 @@ Production-scale REST API backend for AshaBhavan project with Gallery management
 
 - **Admin Users**: Only admins exist in the database. They can login/logout and manage content (upload, edit, delete)
 - **Public Users**: No accounts needed. Anyone can view gallery content without authentication
-- **Protected Routes**: Only admin can access POST, PUT, DELETE endpoints
+- **Protected Routes**: Only admin can access POST, PATCH, DELETE endpoints
 - **Public Routes**: GET endpoints are accessible to everyone
 
 ## Tech Stack
@@ -195,33 +195,37 @@ GET /api/gallery?category=studentWork&page=1&limit=20
 }
 ```
 
-#### Update Gallery (Admin Only - Requires Authentication)
+#### Update Gallery Item (Admin Only - Requires Authentication)
 
 ```
-PUT /api/gallery
+PATCH /api/gallery/:id
 Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "studentWork": [
-    {
-      "url": "https://example.com/new-work.jpg",
-      "title": "New Student Work"
-    }
-  ],
-  "programs": [],
-  "photos": [],
-  "videos": [
-    {
-      "title": "New Video",
-      "url": "https://www.youtube.com/embed/...",
-      "thumbnail": "https://example.com/thumbnail.jpg"
-    }
-  ]
+  "url": "https://example.com/updated-image.jpg",  // optional
+  "title": "Updated Title",                          // optional
+  "category": "studentWork"                          // optional
 }
+```
 
-Note: Videos can only be added via this endpoint with URLs.
-Videos cannot be uploaded - use POST /api/gallery/upload only for images.
+**Note**: All fields are optional. Only provide the fields you want to update.
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Gallery item updated successfully",
+  "data": {
+    "id": "item_id",
+    "url": "https://example.com/updated-image.jpg",
+    "title": "Updated Title",
+    "category": "studentWork",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-02T00:00:00.000Z"
+  }
+}
 ```
 
 #### Upload Gallery Image (Admin Only - Requires Authentication)
@@ -236,7 +240,7 @@ Form Data:
 - category: String (studentWork, programs, photos only - videos cannot be uploaded)
 - title: String (optional)
 
-Note: Only images can be uploaded. Videos must be added via PUT /api/gallery with URL.
+Note: Only images can be uploaded. Videos must be added via PATCH /api/gallery/:id with URL.
 ```
 
 **Response:**
@@ -337,7 +341,7 @@ All errors are handled by the error middleware and return consistent JSON respon
 ## File Uploads
 
 - **Images Only**: Only image files can be uploaded (JPEG, JPG, PNG, GIF, WEBP)
-- **Videos**: Videos cannot be uploaded. They must be added via PUT /api/gallery with URLs (e.g., YouTube embed URLs)
+- **Videos**: Videos cannot be uploaded. They must be added via PATCH /api/gallery/:id with URLs (e.g., YouTube embed URLs)
 - Maximum file size: 10MB
 - Files are stored in `uploads/gallery/` directory
 - Files are accessible via `/uploads/gallery/<filename>`

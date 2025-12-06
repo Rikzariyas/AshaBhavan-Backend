@@ -60,7 +60,8 @@ export const validateGalleryQuery = validate(
         .valid("studentWork", "programs", "photos", "videos")
         .optional()
         .messages({
-          "any.only": "Invalid category. Must be studentWork, programs, photos, or videos",
+          "any.only":
+            "Invalid category. Must be studentWork, programs, photos, or videos",
         }),
       page: Joi.number().integer().min(1).default(1).optional(),
       limit: Joi.number().integer().min(1).max(100).default(20).optional(),
@@ -68,43 +69,9 @@ export const validateGalleryQuery = validate(
   })
 );
 
-// Gallery item validation schema (reusable)
-const galleryItemSchema = Joi.object({
-  url: Joi.string().uri().required().messages({
-    "string.uri": "Invalid URL format",
-    "any.required": "URL is required",
-  }),
-  title: Joi.string().trim().max(200).allow(null, "").optional(),
-  thumbnail: Joi.string().uri().allow(null, "").optional().messages({
-    "string.uri": "Invalid thumbnail URL format",
-  }),
-});
-
-// Gallery update validation schema
-export const validateGalleryUpdate = validate(
-  Joi.object({
-    body: Joi.object({
-      studentWork: Joi.array().items(galleryItemSchema).optional(),
-      programs: Joi.array().items(galleryItemSchema).optional(),
-      photos: Joi.array().items(galleryItemSchema).optional(),
-      videos: Joi.array()
-        .items(
-          galleryItemSchema.keys({
-            thumbnail: Joi.string().uri().allow(null, "").optional().messages({
-              "string.uri": "Invalid thumbnail URL format",
-            }),
-          })
-        )
-        .optional(),
-    }).min(1).messages({
-      "object.min": "At least one category must be provided",
-    }),
-  })
-);
-
 // Gallery upload validation schema
 // Note: Only images can be uploaded (studentWork, programs, photos)
-// Videos cannot be uploaded - they must be added via PUT /api/gallery with URL
+// Videos cannot be uploaded - they must be added via PATCH /api/gallery/:id with URL
 // Note: When using multer, form-data fields come as strings
 export const validateGalleryUpload = validate(
   Joi.object({
@@ -113,7 +80,8 @@ export const validateGalleryUpload = validate(
         .valid("studentWork", "programs", "photos")
         .required()
         .messages({
-          "any.only": "Category must be studentWork, programs, or photos. Videos cannot be uploaded - use PUT /api/gallery with URL instead",
+          "any.only":
+            "Category must be studentWork, programs, or photos. Videos cannot be uploaded - use PATCH /api/gallery/:id with URL instead",
           "any.required": "Category is required",
           "string.empty": "Category is required",
         }),
@@ -134,5 +102,37 @@ export const validateGalleryId = validate(
           "any.required": "Gallery ID is required",
         }),
     }),
+  })
+);
+
+// Gallery item update validation schema (for PATCH - all fields optional)
+export const validateGalleryItemUpdate = validate(
+  Joi.object({
+    params: Joi.object({
+      id: Joi.string()
+        .pattern(/^[0-9a-fA-F]{24}$/)
+        .required()
+        .messages({
+          "string.pattern.base": "Invalid gallery ID format",
+          "any.required": "Gallery ID is required",
+        }),
+    }),
+    body: Joi.object({
+      url: Joi.string().uri().optional().messages({
+        "string.uri": "Invalid URL format",
+      }),
+      title: Joi.string().trim().max(200).allow(null, "").optional(),
+      category: Joi.string()
+        .valid("studentWork", "programs", "photos")
+        .optional()
+        .messages({
+          "any.only":
+            "Invalid category. Must be studentWork, programs, or photos",
+        }),
+    })
+      .min(1)
+      .messages({
+        "object.min": "At least one field must be provided for update",
+      }),
   })
 );

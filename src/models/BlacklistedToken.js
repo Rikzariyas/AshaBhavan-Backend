@@ -11,7 +11,6 @@ const blacklistedTokenSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       required: true,
-      index: { expireAfterSeconds: 0 }, // Auto-delete expired tokens
     },
   },
   {
@@ -22,7 +21,9 @@ const blacklistedTokenSchema = new mongoose.Schema(
 // Create TTL index for automatic cleanup
 blacklistedTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-const BlacklistedToken = mongoose.model("BlacklistedToken", blacklistedTokenSchema);
+const BlacklistedToken = mongoose.model(
+  "BlacklistedToken",
+  blacklistedTokenSchema
+);
 
 export default BlacklistedToken;
-
