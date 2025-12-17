@@ -35,6 +35,8 @@ export const login = async (req, res, next) => {
 
     // Generate token
     const token = generateToken(admin._id, admin.username, admin.role);
+  
+    console.log("token>>>",token);
 
     res.status(200).json({
       success: true,

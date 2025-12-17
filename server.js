@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import connectDB from "./src/config/db.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import galleryRoutes from "./src/routes/galleryRoutes.js";
+import studentRoutes from "./src/routes/studentRoutes.js";
 import { errorHandler, notFound } from "./src/middleware/errorMiddleware.js";
 import { apiLimiter } from "./src/middleware/rateLimiter.js";
 import { v2 as cloudinary } from "cloudinary";
@@ -61,6 +62,7 @@ await connectDB();
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/gallery", galleryRoutes);
+app.use("/api/students", studentRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

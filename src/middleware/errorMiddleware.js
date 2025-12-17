@@ -38,16 +38,31 @@ export const errorHandler = (err, req, res, next) => {
     statusCode = 400;
     if (err.code === "LIMIT_FILE_SIZE") {
       message = "File too large. Maximum size is 10MB";
+    } else if (err.code === "LIMIT_UNEXPECTED_FILE" || err.message?.includes("Unexpected field")) {
+      const fieldName = err.field || "unknown";
+      message = `Unexpected file field: '${fieldName}'. Please use 'avatar' as the field name for file uploads.`;
     } else {
-      message = "File upload error";
+      message = `File upload error: ${err.message || err.code || "Unknown multer error"}`;
     }
   }
 
-  res.status(statusCode).json({
+  const errorResponse = {
     success: false,
     message,
-    ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
-  });
+  };
+
+  // Include field information for multer errors in development
+  if (err.name === "MulterError" && process.env.NODE_ENV !== "production") {
+    errorResponse.field = err.field;
+    errorResponse.code = err.code;
+  }
+
+  // Include stack trace in development
+  if (process.env.NODE_ENV !== "production") {
+    errorResponse.stack = err.stack;
+  }
+
+  res.status(statusCode).json(errorResponse);
 };
 
 export const notFound = (req, res, next) => {
