@@ -149,7 +149,7 @@ export const getStudents = async (req, res, next) => {
       updatedAt: formatDate(student.updatedAt),
     }));
 
-    console.log("formattedStudents>>>>", formattedStudents)
+    // console.log("formattedStudents>>>>", formattedStudents)
 
     res.status(200).json({
       success: true,
@@ -189,7 +189,7 @@ export const getStudentById = async (req, res, next) => {
       updatedAt: formatDate(student.updatedAt),
     }
 
-    console.log("formattedStudentData>>>>", formattedStudentData)
+    // console.log("formattedStudentData>>>>", formattedStudentData)
 
     res.status(200).json({
       success: true,
